@@ -14,6 +14,7 @@ class Game extends React.Component {
       selectedTile: '',
       score: 0,
       matchesLeft: 8,
+      canClick: true,
       letters: _.shuffle([
         'A',
         'A',
@@ -36,60 +37,67 @@ class Game extends React.Component {
   }
 
   match(e) {
-    // this.setState(_.assign({}, this.state, { score: this.state.score + 1 }));
-    // console.log(this.state.score);
+    if (!e.target.classList.contains('show') && this.state.canClick) {
+      e.persist();
+      e.target.firstChild.classList.add('show');
 
-    e.persist();
-    e.target.firstChild.classList.add('show');
-
-    if (!this.state.selectedTile) {
-      this.setState(
-        _.assign({}, this.state, {
-          selectedTile: e.target,
-          score: this.state.score + 1
-        })
-      );
-    } else {
-      if (
-        this.state.selectedTile.firstChild.innerText ==
-        e.target.firstChild.innerText
-      ) {
-        e.target.classList.add('matched');
-        this.state.selectedTile.classList.add('matched');
+      if (!this.state.selectedTile) {
         this.setState(
           _.assign({}, this.state, {
-            selectedTile: '',
-            score: this.state.score + 1,
-            matchesLeft: this.state.matchesLeft - 1
-          }),
-          () => {
-            console.log(this.state.matchesLeft);
-            if (this.state.matchesLeft == 0) {
-              this.setState(_.assign({}, this.state, { hasWon: true }));
-              setTimeout(() => {
-                alert("You've won!");
-              }, 1000);
-            }
-          }
-        );
-      } else {
-        this.setState(
-          _.assign({}, this.state, {
+            selectedTile: e.target,
             score: this.state.score + 1
           })
         );
-        setTimeout(
-          function() {
-            e.target.firstChild.classList.remove('show');
-            this.state.selectedTile.firstChild.classList.remove('show');
+      } else {
+        this.setState(_.assign({}, this.state, { canClick: false }), () => {
+          if (
+            this.state.selectedTile.firstChild.innerText ==
+            e.target.firstChild.innerText
+          ) {
+            e.target.classList.add('matched');
+            this.state.selectedTile.classList.add('matched');
+            e.target.firstChild.removeEventListener('click', this.match);
+            this.state.selectedTile.removeEventListener('click', root.match);
             this.setState(
               _.assign({}, this.state, {
-                selectedTile: ''
+                selectedTile: '',
+                score: this.state.score + 1,
+                matchesLeft: this.state.matchesLeft - 1,
+                canClick: true
+              }),
+              () => {
+                if (this.state.matchesLeft == 0) {
+                  this.setState(
+                    _.assign({}, this.state, { hasWon: true, canClick: true })
+                  );
+                  setTimeout(() => {
+                    alert("You've won!");
+                  }, 1000);
+                }
+              }
+            );
+          } else {
+            this.setState(
+              _.assign({}, this.state, {
+                score: this.state.score + 1
+                // canClick: true
               })
             );
-          }.bind(this),
-          1000
-        );
+            setTimeout(
+              function() {
+                e.target.firstChild.classList.remove('show');
+                this.state.selectedTile.firstChild.classList.remove('show');
+                this.setState(
+                  _.assign({}, this.state, {
+                    selectedTile: '',
+                    canClick: true
+                  })
+                );
+              }.bind(this),
+              1000
+            );
+          }
+        });
       }
     }
   }
