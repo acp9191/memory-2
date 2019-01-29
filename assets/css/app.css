@@ -2,8 +2,59 @@
 
 @import "~milligram/dist/milligram";
 
-.column > p {
+.column>p {
     padding-top: 10ex;
     text-align: center;
 }
 
+td:first-child,
+th:first-child {
+    padding-left: 0;
+}
+
+td:last-child,
+th:last-child {
+    padding-right: 0;
+}
+
+td {
+    text-align: center;
+    border: 0.1rem solid #e1e1e1;
+    cursor: pointer;
+    line-height: 3;
+    padding: 0;
+    width: 25%;
+}
+
+td .tile {
+    backface-visibility: hidden;
+    background-color: whitesmoke;
+    transform: rotateY(180deg);
+    transition: transform .5s, background-color .5s ease-out .5s;
+}
+
+td .tile.show {
+    transform: rotateY(0);
+}
+
+td.matched {
+    cursor: not-allowed;
+    color: black;
+}
+
+td.matched .tile {
+    background-color: #4fb54f;
+}
+
+tr {
+    font-size: 40px;
+}
+
+.center {
+    text-align: center;
+}
+
+.grid {
+    width: 70%;
+    margin: 0 auto 15px;
+}
