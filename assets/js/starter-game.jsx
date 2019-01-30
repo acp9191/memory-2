@@ -10,11 +10,11 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      hasWon: false,
       selectedTile: '',
       score: 0,
       matchesLeft: 8,
       canClick: true,
+      // shuffle letter order when constructed
       letters: _.shuffle([
         'A',
         'A',
@@ -36,66 +36,99 @@ class Game extends React.Component {
     };
   }
 
-  match(e) {
-    if (!e.target.classList.contains('show') && this.state.canClick) {
-      e.persist();
-      e.target.firstChild.classList.add('show');
+  textMatches(tile) {
+    return (
+      this.state.selectedTile.firstChild.innerText == tile.firstChild.innerText
+    );
+  }
 
-      if (!this.state.selectedTile) {
+  userCanClick(tile) {
+    return !tile.classList.contains('show') && this.state.canClick;
+  }
+
+  doesntMatchSelf(tile) {
+    return (
+      this.state.selectedTile.firstChild.dataset.key !=
+      tile.firstChild.dataset.key
+    );
+  }
+
+  noMatch(tile) {
+    this.setState(
+      _.assign({}, this.state, {
+        score: this.state.score + 1
+      })
+    );
+    setTimeout(
+      function() {
+        tile.firstChild.classList.remove('show');
+        this.state.selectedTile.firstChild.classList.remove('show');
         this.setState(
           _.assign({}, this.state, {
-            selectedTile: e.target,
-            score: this.state.score + 1
+            selectedTile: '',
+            canClick: true
           })
         );
-      } else {
+      }.bind(this),
+      1000
+    );
+  }
+
+  checkIfWon() {
+    if (this.state.matchesLeft == 0) {
+      setTimeout(() => {
+        alert("You've won! \nFinal score: " + this.state.score);
+      }, 1000);
+    }
+  }
+
+  selectTile(tile) {
+    this.setState(
+      _.assign({}, this.state, {
+        selectedTile: tile,
+        score: this.state.score + 1
+      })
+    );
+  }
+
+  recordMatch(tile) {
+    tile.classList.add('matched');
+    this.state.selectedTile.classList.add('matched');
+    this.setState(
+      _.assign({}, this.state, {
+        selectedTile: '',
+        score: this.state.score + 1,
+        matchesLeft: this.state.matchesLeft - 1,
+        canClick: true
+      }),
+      () => {
+        // checks to see if all matches are found
+        this.checkIfWon();
+      }
+    );
+  }
+
+  checkMatch(e) {
+    let tile = e.target;
+    // continue only if tile is not already shown (matched) and user is allowed to click
+    if (this.userCanClick(tile)) {
+      e.persist();
+      tile.firstChild.classList.add('show');
+
+      // if there is no tile selected already
+      if (!this.state.selectedTile) {
+        this.selectTile(tile);
+        // makes sure tile doesn't match itself
+      } else if (this.doesntMatchSelf(tile)) {
+        // change state to prevent clicking while checking for match
         this.setState(_.assign({}, this.state, { canClick: false }), () => {
-          if (
-            this.state.selectedTile.firstChild.innerText ==
-            e.target.firstChild.innerText
-          ) {
-            e.target.classList.add('matched');
-            this.state.selectedTile.classList.add('matched');
-            e.target.firstChild.removeEventListener('click', this.match);
-            this.state.selectedTile.removeEventListener('click', root.match);
-            this.setState(
-              _.assign({}, this.state, {
-                selectedTile: '',
-                score: this.state.score + 1,
-                matchesLeft: this.state.matchesLeft - 1,
-                canClick: true
-              }),
-              () => {
-                if (this.state.matchesLeft == 0) {
-                  this.setState(
-                    _.assign({}, this.state, { hasWon: true, canClick: true })
-                  );
-                  setTimeout(() => {
-                    alert("You've won!");
-                  }, 1000);
-                }
-              }
-            );
+          // checks to see if innerText (letter) matches
+          if (this.textMatches(tile)) {
+            // mark tiles as matched and update state
+            this.recordMatch(tile);
           } else {
-            this.setState(
-              _.assign({}, this.state, {
-                score: this.state.score + 1
-                // canClick: true
-              })
-            );
-            setTimeout(
-              function() {
-                e.target.firstChild.classList.remove('show');
-                this.state.selectedTile.firstChild.classList.remove('show');
-                this.setState(
-                  _.assign({}, this.state, {
-                    selectedTile: '',
-                    canClick: true
-                  })
-                );
-              }.bind(this),
-              1000
-            );
+            // if not a match, update score and hide tiles
+            this.noMatch(tile);
           }
         });
       }
@@ -130,13 +163,14 @@ function TileGrid(props) {
   let grid = [];
   let count = 0;
 
+  // creates grid of tiles that are already randomized
   for (let i = 0; i < 4; i++) {
     let row = [];
 
     for (let j = 0; j < 4; j++) {
       row.push(
-        <td key={count} onClick={root.match.bind(root)}>
-          <div className="tile">{`${letters[count]}`}</div>
+        <td key={count} onClick={root.checkMatch.bind(root)}>
+          <div data-key={count} className="tile">{`${letters[count]}`}</div>
         </td>
       );
       count++;
