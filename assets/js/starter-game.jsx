@@ -49,7 +49,9 @@ class Game extends React.Component {
   }
 
   restart() {
-    window.location.reload();
+    this.channel.push('restart').receive('ok', () => {
+      window.location.reload();
+    });
   }
 
   render() {
@@ -61,7 +63,7 @@ class Game extends React.Component {
             <TileGrid root={this} />
           </tbody>
         </table>
-        <button type="button" onClick={this.restart}>
+        <button type="button" onClick={this.restart.bind(this)}>
           Restart
         </button>
       </div>

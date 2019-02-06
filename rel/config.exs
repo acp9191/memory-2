@@ -22,6 +22,19 @@ use Mix.Releases.Config,
 # when building in that environment, this combination of release
 # and environment configuration is called a profile
 
+get_secret = fn name ->
+  # Secret generation hack by Nat Tuck for CS4550
+  # This function is dedicated to the public domain.
+  base = Path.expand("~/.config/phx-secrets")
+  File.mkdir_p!(base)
+  path = Path.join(base, name)
+  unless File.exists?(path) do
+    secret = Base.encode16(:crypto.strong_rand_bytes(32))
+    File.write!(path, secret)
+  end
+  String.trim(File.read!(path))
+end
+
 environment :dev do
   # If you are running Phoenix, you should make sure that
   # server: true is set and the code reloader is disabled,
@@ -31,13 +44,15 @@ environment :dev do
   # dev mode.
   set dev_mode: true
   set include_erts: false
-  set cookie: :"6/C>$[Nj{pn]ME!w[dG_AQ0zh]p]yD*S,rS=xTm%>3OOglL]I.`VaF?%xnlXnC6<"
+  # set cookie: :"6/C>$[Nj{pn]ME!w[dG_AQ0zh]p]yD*S,rS=xTm%>3OOglL]I.`VaF?%xnlXnC6<"
+  set cookie: String.to_atom(get_secret.("dev_cookie"))
 end
 
 environment :prod do
   set include_erts: true
   set include_src: false
-  set cookie: :"lxO:)~Fn,7B~cFAp/4bKv=c?aRp8k4_jSlFi8XB$qb0]p.,*tS^jwC~j=q~OQ253"
+  # set cookie: :"lxO:)~Fn,7B~cFAp/4bKv=c?aRp8k4_jSlFi8XB$qb0]p.,*tS^jwC~j=q~OQ253"
+  set cookie: String.to_atom(get_secret.("dev_cookie"))
   set vm_args: "rel/vm.args"
 end
 
