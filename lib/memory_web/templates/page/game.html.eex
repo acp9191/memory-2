@@ -1,0 +1,9 @@
+<script>
+ window.gameName = "<%= @name %>";
+</script>
+<div class="center">
+  <h1>Memory Game: <%= @name %></h1>
+  <div id="root">
+    <p>React app loading...</p>
+  </div>
+</div>
