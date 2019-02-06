@@ -1,5 +1,18 @@
 use Mix.Config
 
+get_secret = fn name ->
+  # Secret generation hack by Nat Tuck for CS4550
+  # This function is dedicated to the public domain.
+  base = Path.expand("~/.config/phx-secrets")
+  File.mkdir_p!(base)
+  path = Path.join(base, name)
+  unless File.exists?(path) do
+    secret = Base.encode16(:crypto.strong_rand_bytes(32))
+    File.write!(path, secret)
+  end
+  String.trim(File.read!(path))
+end
+
 # For production, don't forget to configure the url host
 # to something meaningful, Phoenix uses this information
 # when generating URLs.
@@ -87,22 +100,8 @@ config :logger, level: :info
 # end
 # secret = File.read!(path)
 
-get_secret = fn name ->
-  # Secret generation hack by Nat Tuck for CS4550
-  # This function is dedicated to the public domain.
-  base = Path.expand("~/.config/phx-secrets")
-  File.mkdir_p!(base)
-  path = Path.join(base, name)
-  unless File.exists?(path) do
-    secret = Base.encode16(:crypto.strong_rand_bytes(32))
-    File.write!(path, secret)
-  end
-  String.trim(File.read!(path))
-end
 
-## In config/prod.exs
-secret_key_base: get_secret.("key_base");
-password: get_secret.("db_pass") # Manually make file match password
 
 config :memory, MemoryWeb.Endpoint,
-  secret_key_base: secret
+  secret_key_base: get_secret.("key_base"),
+  password: get_secret.("db_pass")
