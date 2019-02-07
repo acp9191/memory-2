@@ -28,6 +28,6 @@ $(() => {
   }
 
   $("input").on('change', function () {
-    $("#game_link").attr("href", "http://localhost:4000/game/" + $(this).val());
+    window.location.href += ("game/" + $(this).val());
   });
 });
