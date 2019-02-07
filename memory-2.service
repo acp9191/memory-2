@@ -9,8 +9,8 @@ Restart=on-failure
 Environment=MIX_ENV=prod "PORT=4792"
 Environment=LANG=en_US.UTF-8
 
-WorkingDirectory=/home/memory-2/memory
-ExecStart=/home/memory-2/memory/start.sh
+WorkingDirectory=/home/memory-2/memory-2
+ExecStart=/home/memory-2/memory-2/start.sh
 
 [Install]
 WantedBy=multi-user.target
