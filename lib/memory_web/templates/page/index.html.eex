@@ -1,4 +1,8 @@
 <div class="center">
     <h1>Join a Game</h1>
-    <p><a href="/game/demo">Join "demo"</a></p>
+    <%# <p><a href="/game/demo">Join "demo"</a></p> %>
+    <%= form_for @conn, "/", fn f -> %>
+        <%= text_input f, :for %>
+        <a href="" id="game_link">Submit</a>
+    <% end %>
 </div>
